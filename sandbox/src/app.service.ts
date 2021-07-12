@@ -4,8 +4,8 @@ import { Injectable } from '@nestjs/common';
 export class AppService {
   getHello(): Record<string, any> {
     return {
-        env: process.env,
-        ts: new Date().toISOString(),
+      env: process.env,
+      ts: new Date().toISOString(),
     };
   }
 }

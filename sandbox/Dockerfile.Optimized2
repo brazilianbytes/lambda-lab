@@ -1,0 +1,40 @@
+FROM node:14-alpine as builder
+
+WORKDIR /usr/src/app
+
+COPY package*.json ./
+COPY .nvmrc ./
+
+RUN source /etc/profile; \
+    nvm install; \
+    npm install
+
+COPY . .
+
+RUN source /etc/profile; \
+    npm run build
+
+FROM nvm:alpine
+
+ARG NODE_ENV=production
+ENV NODE_ENV=${NODE_ENV}
+
+WORKDIR /var/task
+
+COPY package*.json ./
+COPY .nvmrc ./
+
+RUN source /etc/profile; \
+    nvm install; \
+    npm install --only=production;
+
+RUN apk add -U g++ make cmake unzip curl-dev; \
+    source /etc/profile; \
+    npm install -g aws-lambda-ric;
+
+COPY --from=builder /usr/src/app/dist ./dist
+
+EXPOSE 8080
+
+ENTRYPOINT ["aws-lambda-ric"]
+CMD [ "dist/lambda.handler" ]

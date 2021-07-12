@@ -1,0 +1,23 @@
+# PRODUCTION DOCKERFILE
+# ---------------------
+# https://blog.logrocket.com/containerized-development-nestjs-docker/
+#
+# Dockerfile best practices
+# https://docs.docker.com/develop/develop-images/dockerfile_best-practices/
+# Dockerized NodeJS best practices
+# https://github.com/nodejs/docker-node/blob/master/docs/BestPractices.md
+# https://www.bretfisher.com/node-docker-good-defaults/
+# http://goldbergyoni.com/checklist-best-practice-of-node-js-in-production/
+
+FROM alpine as builder
+
+ENV PROFILE /etc/profile.d/nvm.sh
+
+RUN apk add -U curl bash libstdc++; \
+    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh | bash; \
+    echo "export NVM_NODEJS_ORG_MIRROR=https://unofficial-builds.nodejs.org/download/release" >> $PROFILE; \
+    echo "export NVM_DIR=~/.nvm" >> $PROFILE; \
+    echo "source ~/.nvm/nvm.sh" >> $PROFILE; \
+    echo "nvm_get_arch() { nvm_echo \"x64-musl\"; }" >> $PROFILE;
+
+ENV ENV="/etc/profile"

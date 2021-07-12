@@ -1,0 +1,34 @@
+# PRODUCTION DOCKERFILE
+# ---------------------
+# https://blog.logrocket.com/containerized-development-nestjs-docker/
+#
+# Dockerfile best practices
+# https://docs.docker.com/develop/develop-images/dockerfile_best-practices/
+# Dockerized NodeJS best practices
+# https://github.com/nodejs/docker-node/blob/master/docs/BestPractices.md
+# https://www.bretfisher.com/node-docker-good-defaults/
+# http://goldbergyoni.com/checklist-best-practice-of-node-js-in-production/
+
+FROM node:14-alpine
+
+ARG LAMBDA_TASK_ROOT="/var/task"
+ARG LAMBDA_RUNTIME_DIR="/var/runtime"
+
+RUN apk add --update --no-cache --virtual .build-deps \
+    g++ make cmake unzip autoconf automake libtool libexecinfo-dev python3; \
+
+    ## Install Runtime Interface Client for NodeJs
+    npm install --unsafe-perm -g aws-lambda-ric; \
+
+    ## Wipe build dependencies
+    apk del .build-deps; \
+
+    ## Install Runtime Interface Client Emulator
+    wget -O /usr/local/bin/aws-lambda-rie https://github.com/aws/aws-lambda-runtime-interface-emulator/releases/latest/download/aws-lambda-rie; \
+    chmod a+x /usr/local/bin/aws-lambda-rie
+
+COPY entrypoint.sh /usr/local/bin
+
+EXPOSE 8080
+
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
